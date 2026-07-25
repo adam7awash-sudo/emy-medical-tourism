@@ -8,9 +8,10 @@ export function hashPassword(password: string): string {
 
 export function verifyPassword(password: string, hashedPassword: string): boolean {
   const [salt, hash] = hashedPassword.split(":");
+  if (!salt || !hash) return false;
   const verifyHash = createHash("sha256").update(password + salt).digest("hex");
   try {
-    return timingSafeEqual(Buffer.from(hash), Buffer.from(verifyHash));
+    return timingSafeEqual(Buffer.from(hash, "hex"), Buffer.from(verifyHash, "hex"));
   } catch {
     return false;
   }
@@ -19,8 +20,6 @@ export function verifyPassword(password: string, hashedPassword: string): boolea
 export function generateSessionToken(): string {
   return randomBytes(32).toString("hex");
 }
-
-const SESSION_SECRET = process.env.SESSION_SECRET || "emt-session-secret-2024-change-in-production";
 
 export function createSessionCookie(token: string): string {
   return token;
