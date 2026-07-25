@@ -1,0 +1,145 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Admin {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String   @default("Admin")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Booking {
+  id               String   @id @default(cuid())
+  patientName      String
+  country          String
+  phone            String
+  email            String
+  specialtyId      String?
+  specialtyName    String?
+  preferredDoctorId String?
+  preferredDoctorName String?
+  notes            String?
+  reports          String   @default("[]")
+  status           String   @default("pending")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model Doctor {
+  id          String   @id @default(cuid())
+  nameAr      String
+  nameEn      String   @default("")
+  titleAr     String
+  titleEn     String   @default("")
+  specialtyId String?
+  image       String   @default("")
+  order       Int      @default(0)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Specialty {
+  id        String   @id @default(cuid())
+  nameAr    String
+  nameEn    String   @default("")
+  icon      String   @default("")
+  image     String   @default("")
+  order     Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Service {
+  id      String   @id @default(cuid())
+  nameAr  String
+  nameEn  String   @default("")
+  icon    String   @default("")
+  order   Int      @default(0)
+  active  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Partner {
+  id        String   @id @default(cuid())
+  name      String
+  logo      String   @default("")
+  url       String   @default("")
+  order     Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PatientStory {
+  id        String   @id @default(cuid())
+  nameAr    String
+  nameEn    String   @default("")
+  country   String   @default("")
+  storyAr   String
+  storyEn   String   @default("")
+  image     String   @default("")
+  rating    Int      @default(5)
+  order     Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SiteSetting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String @default("")
+  type  String   @default("text")
+}
+
+model GalleryImage {
+  id        String   @id @default(cuid())
+  title     String   @default("")
+  image     String
+  category  String   @default("general")
+  order     Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model HomepageContent {
+  id    String @id @default(cuid())
+  key   String @unique
+  valueAr String   @default("")
+  valueEn String   @default("")
+  type  String   @default("text")
+}
+
+model Tour {
+  id          String   @id @default(cuid())
+  nameAr      String
+  nameEn      String   @default("")
+  descriptionAr String   @default("")
+  descriptionEn String   @default("")
+  image       String   @default("")
+  price       String   @default("")
+  duration    String   @default("")
+  locationAr  String   @default("")
+  locationEn  String   @default("")
+  includesAr  String   @default("")
+  includesEn  String   @default("")
+  category    String   @default("tourism")
+  featured    Boolean  @default(false)
+  order       Int      @default(0)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
