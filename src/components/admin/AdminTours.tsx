@@ -16,8 +16,20 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, MapPin, Calendar, Users, DollarSign, Trash2, Edit } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Plus,
+  Trash2,
+  Edit,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 type Tour = {
@@ -60,6 +72,11 @@ export default function AdminTours() {
   const { toast } = useToast();
   const [tours, setTours] = useState<Tour[]>([]);
   const [loading, setLoading] = useState(true);
+  const [hidden, setHidden] = useState<Record<CategoryKey, boolean>>({
+    religious: false,
+    cairo: false,
+    outside_cairo: false,
+  });
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
@@ -77,11 +94,21 @@ export default function AdminTours() {
   async function load() {
     setLoading(true);
     try {
-      const res = await fetch("/api/tours");
-      const data = await res.json();
-      setTours(data.tours || []);
+      const [r1, r2] = await Promise.all([
+        fetch("/api/tours"),
+        fetch("/api/settings"),
+      ]);
+      const d1 = await r1.json();
+      setTours(d1.tours || []);
+      const d2 = await r2.json();
+      const s = d2.settings || {};
+      setHidden({
+        religious: s.tour_category_hidden_religious === "true",
+        cairo: s.tour_category_hidden_cairo === "true",
+        outside_cairo: s.tour_category_hidden_outside_cairo === "true",
+      });
     } catch {
-      toast({ title: "خطأ", description: "تعذر تحميل الرحلات", variant: "destructive" });
+      toast({ title: "خطأ", description: "تعذر التحميل", variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -90,6 +117,29 @@ export default function AdminTours() {
   useEffect(() => {
     load();
   }, []);
+
+  async function toggleHide(k: CategoryKey) {
+    const newVal = !hidden[k];
+    const next = { ...hidden, [k]: newVal };
+    setHidden(next);
+    try {
+      await fetch("/api/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          key: `tour_category_hidden_${k}`,
+          value: String(newVal),
+        }),
+      });
+      toast({
+        title: newVal ? "تم إخفاء القسم" : "تم إظهار القسم",
+        description: CATEGORIES.find((c) => c.key === k)?.label,
+      });
+    } catch {
+      toast({ title: "خطأ", variant: "destructive" });
+      setHidden(hidden);
+    }
+  }
 
   function openAdd() {
     setEditId(null);
@@ -123,7 +173,11 @@ export default function AdminTours() {
 
   async function save() {
     if (!form.title || !form.description) {
-      toast({ title: "بيانات ناقصة", description: "اكتب العنوان والوصف", variant: "destructive" });
+      toast({
+        title: "بيانات ناقصة",
+        description: "اكتب العنوان والوصف",
+        variant: "destructive",
+      });
       return;
     }
     const body = {
@@ -163,7 +217,7 @@ export default function AdminTours() {
       toast({ title: "تم الحذف" });
       load();
     } catch {
-      toast({ title: "خطأ", description: "حذف فاشل", variant: "destructive" });
+      toast({ title: "خطأ", variant: "destructive" });
     }
   }
 
@@ -175,7 +229,7 @@ export default function AdminTours() {
         <div>
           <h2 className="text-2xl font-bold">إدارة الرحلات</h2>
           <p className="text-muted-foreground text-sm">
-            ثلاث أقسام: دينية، داخلية، خارجية — كل قسم بصورته الجاهزة.
+            ثلاث أقسام: دينية، داخلية، خارجية. ممكن تخفي أي قسم من الموقع.
           </p>
         </div>
         <Button onClick={openAdd} className="flex items-center gap-2">
@@ -183,34 +237,63 @@ export default function AdminTours() {
         </Button>
       </div>
 
-      {/* قسم الكروت الثلاثة */}
+      {/* كروت الأقسام */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {CATEGORIES.map((c) => (
-          <Card key={c.key} className="overflow-hidden p-0">
-            <div className="relative h-44 w-full bg-muted">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={c.image}
-                alt={c.label}
-                className="h-full w-full object-cover"
-              />
-              <div className="absolute inset-0 bg-black/40" />
-              <div className="absolute bottom-3 right-3 text-white">
-                <h3 className="text-lg font-bold">{c.label}</h3>
-                <p className="text-xs opacity-90">
-                  {toursByCat(c.key).length} رحلات
-                </p>
+        {CATEGORIES.map((c) => {
+          const isHidden = hidden[c.key];
+          return (
+            <Card key={c.key} className="overflow-hidden p-0 relative">
+              <div className="relative h-44 w-full bg-muted">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={c.image}
+                  alt={c.label}
+                  className={`h-full w-full object-cover ${
+                    isHidden ? "opacity-40 grayscale" : ""
+                  }`}
+                />
+                <div className="absolute inset-0 bg-black/40" />
+                <div className="absolute bottom-3 right-3 text-white">
+                  <h3 className="text-lg font-bold">{c.label}</h3>
+                  <p className="text-xs opacity-90">
+                    {toursByCat(c.key).length} رحلات
+                  </p>
+                </div>
+                {/* زرار الإخفاء/الإظهار */}
+                <button
+                  onClick={() => toggleHide(c.key)}
+                  title={isHidden ? "إظهار القسم" : "إخفاء القسم من الموقع"}
+                  className="absolute top-2 left-2 bg-white/90 hover:bg-white text-black rounded-full p-2 shadow-md transition"
+                >
+                  {isHidden ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+                {isHidden && (
+                  <div className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
+                    مخفي
+                  </div>
+                )}
               </div>
-            </div>
-          </Card>
-        ))}
+            </Card>
+          );
+        })}
       </div>
 
-      {/* جدول الرحلات */}
+      {/* قوائم الرحلات لكل قسم */}
       <div className="space-y-4">
         {CATEGORIES.map((c) => (
           <div key={c.key}>
-            <h3 className="text-lg font-semibold mb-2">{c.label}</h3>
+            <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
+              {c.label}
+              {hidden[c.key] && (
+                <Badge variant="secondary" className="text-xs">
+                  مخفي من الموقع
+                </Badge>
+              )}
+            </h3>
             {loading ? (
               <p className="text-sm text-muted-foreground">جارٍ التحميل...</p>
             ) : toursByCat(c.key).length === 0 ? (
@@ -235,17 +318,6 @@ export default function AdminTours() {
                       <p className="text-xs text-muted-foreground line-clamp-1">
                         {t.description}
                       </p>
-                      <div className="flex gap-3 text-xs text-muted-foreground mt-1">
-                        <span className="flex items-center gap-1">
-                          <DollarSign className="h-3 w-3" /> {t.price}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3" /> {t.duration}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Users className="h-3 w-3" /> {t.groupSize}
-                        </span>
-                      </div>
                     </div>
                     <div className="flex gap-1">
                       <Button
@@ -311,7 +383,9 @@ export default function AdminTours() {
                   <SelectContent>
                     <SelectItem value="religious">سياحة دينية</SelectItem>
                     <SelectItem value="cairo">سياحة داخلية</SelectItem>
-                    <SelectItem value="outside_cairo">سياحة خارجية</SelectItem>
+                    <SelectItem value="outside_cairo">
+                      سياحة خارجية
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -320,9 +394,7 @@ export default function AdminTours() {
                 <Input
                   type="number"
                   value={form.price}
-                  onChange={(e) =>
-                    setForm({ ...form, price: e.target.value })
-                  }
+                  onChange={(e) => setForm({ ...form, price: e.target.value })}
                 />
               </div>
             </div>
