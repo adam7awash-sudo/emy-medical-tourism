@@ -47,21 +47,21 @@ const CATEGORIES: {
     label: "سياحة دينية",
     description: "زيارة المساجد والأماكن الدينية التاريخية",
     image:
-      "https://images.unsplash.com/photo-1545167622-3a6ac756afa4?w=800&q=80",
+      "https://i.postimg.cc/BvmJYFn8/Screenshot-2026-07-26-195908.png",
   },
   {
     key: "cairo",
     label: "سياحة داخلية",
     description: "استكشف معالم القاهرة والمدن المصرية",
     image:
-      "https://images.unsplash.com/photo-1572252009286-268acec5ca0a?w=800&q=80",
+      "https://i.postimg.cc/qMcqczyL/Screenshot-2026-07-26-200042.png",
   },
   {
     key: "outside_cairo",
     label: "سياحة خارجية",
     description: "رحلات دولية إلى أجمل الوجهات العالمية",
     image:
-      "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=800&q=80",
+      "https://i.postimg.cc/dtJwYnZr/Screenshot-2026-07-26-200330.png",
   },
 ];
 
