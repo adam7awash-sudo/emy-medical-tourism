@@ -161,6 +161,17 @@ export default function AdminPartners() {
                   </Button>
                 </label>
               </div>
+              <div className="space-y-1">
+                <Label className="text-xs text-muted-foreground">{t('أو أدخل رابط الشعار:', 'Or enter logo URL:')}</Label>
+                <Input
+                  value={form.logo}
+                  onChange={(e) => setForm({ ...form, logo: e.target.value })}
+                  dir="ltr"
+                  className="text-sm font-en"
+                  placeholder="https://..."
+                  onKeyDown={(e) => e.stopPropagation()}
+                />
+              </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setDialogOpen(false)}>{t('إلغاء', 'Cancel')}</Button>

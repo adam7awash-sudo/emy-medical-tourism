@@ -199,6 +199,17 @@ export default function AdminStories() {
                   </Button>
                 </label>
               </div>
+              <div className="space-y-1">
+                <Label className="text-xs text-muted-foreground">{t('أو أدخل رابط الصورة:', 'Or enter image URL:')}</Label>
+                <Input
+                  value={form.image}
+                  onChange={(e) => setForm({ ...form, image: e.target.value })}
+                  dir="ltr"
+                  className="text-sm font-en"
+                  placeholder="https://..."
+                  onKeyDown={(e) => e.stopPropagation()}
+                />
+              </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setDialogOpen(false)}>{t('إلغاء', 'Cancel')}</Button>
