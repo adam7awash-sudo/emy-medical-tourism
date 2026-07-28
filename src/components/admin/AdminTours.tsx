@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -47,26 +47,62 @@ type Tour = {
 
 type CategoryKey = "religious" | "cairo" | "outside_cairo";
 
+/* صور صغيرة وسريعة */
 const CATEGORIES: { key: CategoryKey; label: string; image: string }[] = [
   {
     key: "religious",
     label: "سياحة دينية",
-    image:
-      "https://images.unsplash.com/photo-1545167622-3a6ac756afa4?w=800&q=80",
+    image: "https://images.unsplash.com/photo-1579611543025-eva4c543866c?w=600&q=70",
   },
   {
     key: "cairo",
     label: "سياحة داخلية",
-    image:
-      "https://images.unsplash.com/photo-1572252009286-268acec5ca0a?w=800&q=80",
+    image: "https://images.unsplash.com/photo-1503177119275-0aa32b3a9368?w=600&q=70",
   },
   {
     key: "outside_cairo",
     label: "سياحة خارجية",
-    image:
-      "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=800&q=80",
+    image: "https://images.unsplash.com/photo-1580013759032-c96505e24c1f?w=600&q=70",
   },
 ];
+
+/* خريطة التحميل المسبق - كل الصور اللي اتحملت */
+const preloaded = new Set<string>();
+
+function preloadImage(src: string) {
+  if (preloaded.has(src)) return;
+  preloaded.add(src);
+  const img = new Image();
+  img.src = src;
+}
+
+/* مكون الصورة - يظهر فوراً لو اتحملت قبل كده */
+function FastImage({ src, alt, className, dim }: { src: string; alt: string; className?: string; dim?: boolean }) {
+  const [ok, setOk] = useState(preloaded.has(src));
+
+  useEffect(() => {
+    if (ok) return;
+    preloadImage(src);
+    const img = new Image();
+    img.onload = () => setOk(true);
+    img.src = src;
+  }, [src, ok]);
+
+  return (
+    <div className={`relative bg-gray-200 ${className || ""}`}>
+      {!ok && (
+        <div className="absolute inset-0 bg-gray-200 animate-pulse" />
+      )}
+      <img
+        src={src}
+        alt={alt}
+        className={`h-full w-full object-cover transition-opacity duration-200 ${
+          ok ? "opacity-100" : "opacity-0"
+        } ${dim ? "grayscale opacity-40" : ""}`}
+      />
+    </div>
+  );
+}
 
 export default function AdminTours() {
   const { toast } = useToast();
@@ -90,6 +126,11 @@ export default function AdminTours() {
     image: "",
     featured: false,
   });
+
+  /* حمّل الصور فوراً أول ما يفتح الأدمن */
+  useEffect(() => {
+    CATEGORIES.forEach((c) => preloadImage(c.image));
+  }, []);
 
   async function load() {
     setLoading(true);
@@ -144,14 +185,8 @@ export default function AdminTours() {
   function openAdd() {
     setEditId(null);
     setForm({
-      title: "",
-      description: "",
-      category: "religious",
-      price: "",
-      duration: "",
-      groupSize: "",
-      image: "",
-      featured: false,
+      title: "", description: "", category: "religious",
+      price: "", duration: "", groupSize: "", image: "", featured: false,
     });
     setDialogOpen(true);
   }
@@ -159,48 +194,31 @@ export default function AdminTours() {
   function openEdit(t: Tour) {
     setEditId(t.id);
     setForm({
-      title: t.title,
-      description: t.description,
-      category: t.category,
-      price: String(t.price),
-      duration: t.duration,
-      groupSize: t.groupSize,
-      image: t.image,
-      featured: t.featured,
+      title: t.title, description: t.description, category: t.category,
+      price: String(t.price), duration: t.duration, groupSize: t.groupSize,
+      image: t.image, featured: t.featured,
     });
     setDialogOpen(true);
   }
 
   async function save() {
     if (!form.title || !form.description) {
-      toast({
-        title: "بيانات ناقصة",
-        description: "اكتب العنوان والوصف",
-        variant: "destructive",
-      });
+      toast({ title: "بيانات ناقصة", description: "اكتب العنوان والوصف", variant: "destructive" });
       return;
     }
     const body = {
-      title: form.title,
-      description: form.description,
-      category: form.category,
-      price: Number(form.price) || 0,
-      duration: form.duration,
+      title: form.title, description: form.description, category: form.category,
+      price: Number(form.price) || 0, duration: form.duration,
       groupSize: form.groupSize,
-      image:
-        form.image ||
-        "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800&q=80",
+      image: form.image || "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400&q=60",
       featured: form.featured,
     };
     try {
-      const res = await fetch(
-        editId ? `/api/tours/${editId}` : "/api/tours",
-        {
-          method: editId ? "PUT" : "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-        }
-      );
+      const res = await fetch(editId ? `/api/tours/${editId}` : "/api/tours", {
+        method: editId ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
       if (!res.ok) throw new Error();
       toast({ title: editId ? "تم التحديث" : "تمت الإضافة" });
       setDialogOpen(false);
@@ -243,38 +261,22 @@ export default function AdminTours() {
           const isHidden = hidden[c.key];
           return (
             <Card key={c.key} className="overflow-hidden p-0 relative">
-              <div className="relative h-44 w-full bg-muted">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={c.image}
-                  alt={c.label}
-                  className={`h-full w-full object-cover ${
-                    isHidden ? "opacity-40 grayscale" : ""
-                  }`}
-                />
+              <div className="relative h-44 w-full">
+                <FastImage src={c.image} alt={c.label} className="h-full w-full" dim={isHidden} />
                 <div className="absolute inset-0 bg-black/40" />
                 <div className="absolute bottom-3 right-3 text-white">
                   <h3 className="text-lg font-bold">{c.label}</h3>
-                  <p className="text-xs opacity-90">
-                    {toursByCat(c.key).length} رحلات
-                  </p>
+                  <p className="text-xs opacity-90">{toursByCat(c.key).length} رحلات</p>
                 </div>
-                {/* زرار الإخفاء/الإظهار */}
                 <button
                   onClick={() => toggleHide(c.key)}
                   title={isHidden ? "إظهار القسم" : "إخفاء القسم من الموقع"}
                   className="absolute top-2 left-2 bg-white/90 hover:bg-white text-black rounded-full p-2 shadow-md transition"
                 >
-                  {isHidden ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
+                  {isHidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
                 {isHidden && (
-                  <div className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
-                    مخفي
-                  </div>
+                  <div className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded">مخفي</div>
                 )}
               </div>
             </Card>
@@ -282,17 +284,13 @@ export default function AdminTours() {
         })}
       </div>
 
-      {/* قوائم الرحلات لكل قسم */}
+      {/* قوائم الرحلات */}
       <div className="space-y-4">
         {CATEGORIES.map((c) => (
           <div key={c.key}>
             <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
               {c.label}
-              {hidden[c.key] && (
-                <Badge variant="secondary" className="text-xs">
-                  مخفي من الموقع
-                </Badge>
-              )}
+              {hidden[c.key] && <Badge variant="secondary" className="text-xs">مخفي من الموقع</Badge>}
             </h3>
             {loading ? (
               <p className="text-sm text-muted-foreground">جارٍ التحميل...</p>
@@ -302,38 +300,17 @@ export default function AdminTours() {
               <div className="grid gap-3">
                 {toursByCat(c.key).map((t) => (
                   <Card key={t.id} className="p-3 flex gap-3 items-center">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={t.image}
-                      alt={t.title}
-                      className="h-16 w-24 object-cover rounded"
-                    />
+                    <img src={t.image} alt={t.title} className="h-16 w-24 object-cover rounded bg-gray-200" />
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <h4 className="font-medium">{t.title}</h4>
-                        {t.featured && (
-                          <Badge className="text-xs">مميزة</Badge>
-                        )}
+                        {t.featured && <Badge className="text-xs">مميزة</Badge>}
                       </div>
-                      <p className="text-xs text-muted-foreground line-clamp-1">
-                        {t.description}
-                      </p>
+                      <p className="text-xs text-muted-foreground line-clamp-1">{t.description}</p>
                     </div>
                     <div className="flex gap-1">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => openEdit(t)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => remove(t.id)}
-                      >
-                        <Trash2 className="h-4 w-4 text-red-500" />
-                      </Button>
+                      <Button size="sm" variant="ghost" onClick={() => openEdit(t)}><Edit className="h-4 w-4" /></Button>
+                      <Button size="sm" variant="ghost" onClick={() => remove(t.id)}><Trash2 className="h-4 w-4 text-red-500" /></Button>
                     </div>
                   </Card>
                 ))}
@@ -351,98 +328,34 @@ export default function AdminTours() {
             <DialogDescription>املأ بيانات الرحلة.</DialogDescription>
           </DialogHeader>
           <div className="grid gap-3">
-            <div>
-              <Label>عنوان الرحلة</Label>
-              <Input
-                value={form.title}
-                onChange={(e) => setForm({ ...form, title: e.target.value })}
-              />
-            </div>
-            <div>
-              <Label>الوصف</Label>
-              <Textarea
-                value={form.description}
-                onChange={(e) =>
-                  setForm({ ...form, description: e.target.value })
-                }
-                rows={3}
-              />
-            </div>
+            <div><Label>عنوان الرحلة</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></div>
+            <div><Label>الوصف</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} /></div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label>القسم</Label>
-                <Select
-                  value={form.category}
-                  onValueChange={(v) =>
-                    setForm({ ...form, category: v as CategoryKey })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
+                <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v as CategoryKey })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="religious">سياحة دينية</SelectItem>
                     <SelectItem value="cairo">سياحة داخلية</SelectItem>
-                    <SelectItem value="outside_cairo">
-                      سياحة خارجية
-                    </SelectItem>
+                    <SelectItem value="outside_cairo">سياحة خارجية</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-              <div>
-                <Label>السعر</Label>
-                <Input
-                  type="number"
-                  value={form.price}
-                  onChange={(e) => setForm({ ...form, price: e.target.value })}
-                />
-              </div>
+              <div><Label>السعر</Label><Input type="number" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} /></div>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label>المدة</Label>
-                <Input
-                  value={form.duration}
-                  onChange={(e) =>
-                    setForm({ ...form, duration: e.target.value })
-                  }
-                  placeholder="مثلاً: 3 أيام"
-                />
-              </div>
-              <div>
-                <Label>حجم المجموعة</Label>
-                <Input
-                  value={form.groupSize}
-                  onChange={(e) =>
-                    setForm({ ...form, groupSize: e.target.value })
-                  }
-                  placeholder="مثلاً: 2-10"
-                />
-              </div>
+              <div><Label>المدة</Label><Input value={form.duration} onChange={(e) => setForm({ ...form, duration: e.target.value })} placeholder="مثلاً: 3 أيام" /></div>
+              <div><Label>حجم المجموعة</Label><Input value={form.groupSize} onChange={(e) => setForm({ ...form, groupSize: e.target.value })} placeholder="مثلاً: 2-10" /></div>
             </div>
-            <div>
-              <Label>رابط الصورة (اختياري)</Label>
-              <Input
-                value={form.image}
-                onChange={(e) => setForm({ ...form, image: e.target.value })}
-                placeholder="https://..."
-              />
-            </div>
+            <div><Label>رابط الصورة (اختياري)</Label><Input value={form.image} onChange={(e) => setForm({ ...form, image: e.target.value })} placeholder="https://..." /></div>
             <label className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={form.featured}
-                onChange={(e) =>
-                  setForm({ ...form, featured: e.target.checked })
-                }
-              />
+              <input type="checkbox" checked={form.featured} onChange={(e) => setForm({ ...form, featured: e.target.checked })} />
               رحلة مميزة
             </label>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>
-              إلغاء
-            </Button>
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>إلغاء</Button>
             <Button onClick={save}>حفظ</Button>
           </DialogFooter>
         </DialogContent>
