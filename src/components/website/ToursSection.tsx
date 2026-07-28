@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -34,19 +33,19 @@ const CATEGORIES: { key: CategoryKey; label: string; description: string; image:
     key: "religious",
     label: "سياحة دينية",
     description: "زيارة المساجد والأماكن الدينية التاريخية",
-    image: "https://images.unsplash.com/photo-1579611543025-eva4c543866c?w=600&q=70",
+    image: "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/b9752789a88e.jpeg",
   },
   {
     key: "cairo",
     label: "سياحة داخلية",
     description: "استكشف معالم القاهرة والمدن المصرية",
-    image: "https://images.unsplash.com/photo-1503177119275-0aa32b3a9368?w=600&q=70",
+    image: "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/6e4923a5a270.jpg",
   },
   {
     key: "outside_cairo",
     label: "سياحة خارجية",
     description: "رحلات دولية إلى أجمل الوجهات العالمية",
-    image: "https://images.unsplash.com/photo-1580013759032-c96505e24c1f?w=600&q=70",
+    image: "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/c759d71a6591.jpg",
   },
 ];
 
