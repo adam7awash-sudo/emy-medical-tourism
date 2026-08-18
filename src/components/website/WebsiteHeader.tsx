@@ -18,15 +18,42 @@ const navLinks = [
   { key: 'contact', ar: 'تواصل معنا', en: 'Contact', href: '#contact' },
 ];
 
+function LogoComponent({ logoUrl, t }: { logoUrl: string; t: (ar: string, en: string) => string }) {
+  if (logoUrl) {
+    return (
+      <img
+        src={logoUrl}
+        alt="EMT Logo"
+        className="w-11 h-11 rounded-xl object-cover shadow-lg shadow-primary/20 transition-transform duration-300 group-hover:scale-105"
+      />
+    );
+  }
+  return (
+    <div className="w-11 h-11 rounded-xl gradient-primary flex items-center justify-center shadow-lg shadow-primary/20 transition-transform duration-300 group-hover:scale-105">
+      <span className="text-white font-extrabold text-xl tracking-tight">E</span>
+    </div>
+  );
+}
+
 export default function WebsiteHeader() {
   const { lang, t, setLang, isRTL } = useLanguageStore();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [siteLogo, setSiteLogo] = useState('');
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 30);
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    fetch('/api/settings')
+      .then((r) => r.json())
+      .then((data) => {
+        if (data?.site_logo) setSiteLogo(data.site_logo);
+      })
+      .catch(() => {});
   }, []);
 
   const scrollToSection = (href: string) => {
@@ -52,9 +79,7 @@ export default function WebsiteHeader() {
             onClick={() => scrollToSection('#home')}
             className="flex items-center gap-3 shrink-0 group"
           >
-            <div className="w-11 h-11 rounded-xl gradient-primary flex items-center justify-center shadow-lg shadow-primary/20 transition-transform duration-300 group-hover:scale-105">
-              <span className="text-white font-extrabold text-xl tracking-tight">E</span>
-            </div>
+            <LogoComponent logoUrl={siteLogo} t={t} />
             <div className="flex flex-col">
               <span className="text-2xl font-extrabold text-primary leading-none tracking-tight">
                 EMT
@@ -122,9 +147,7 @@ export default function WebsiteHeader() {
                 <SheetTitle className="sr-only">القائمة</SheetTitle>
                 <div className="p-6 border-b border-border/50">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shadow-lg shadow-primary/20">
-                      <span className="text-white font-extrabold text-lg">E</span>
-                    </div>
+                    <LogoComponent logoUrl={siteLogo} t={t} />
                     <div>
                       <span className="text-xl font-extrabold text-primary">EMT</span>
                       <p className="text-xs text-muted-foreground">{t('سياحة علاجية', 'Medical Tourism')}</p>
