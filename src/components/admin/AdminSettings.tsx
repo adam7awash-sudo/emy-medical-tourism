@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useToast } from '@/hooks/use-toast'
-import { Save, Loader2, Phone, Mail, MessageCircle, Facebook, Instagram, Key } from 'lucide-react'
+import { Save, Loader2, Phone, Mail, MessageCircle, Facebook, Instagram, Key, Code, Link } from 'lucide-react'
 
 interface SettingField {
   key: string
@@ -27,6 +27,8 @@ const fields: SettingField[] = [
   { key: 'facebook', labelAr: 'رابط فيسبوك', labelEn: 'Facebook URL', icon: <Facebook className="w-5 h-5 text-blue-600" />, type: 'url', dir: 'ltr' },
   { key: 'instagram', labelAr: 'رابط إنستغرام', labelEn: 'Instagram URL', icon: <Instagram className="w-5 h-5 text-pink-600" />, type: 'url', dir: 'ltr' },
   { key: 'resend_api_key', labelAr: 'مفتاح Resend API', labelEn: 'Resend API Key', icon: <Key className="w-5 h-5 text-violet-600" />, type: 'password', dir: 'ltr', hint: 're_xxxxxxxxxxxx - لازم عشان إرسال إيميلات الحجوزات' },
+  { key: 'developer_name', labelAr: 'اسم المطور', labelEn: 'Developer Name', icon: <Code className="w-5 h-5 text-emt-gold" />, type: 'text', dir: 'ltr', hint: 'الاسم اللي هيظهر في الفوتر "Made by ..."' },
+  { key: 'developer_link', labelAr: 'لينك المطور', labelEn: 'Developer Link', icon: <Link className="w-5 h-5 text-emt-gold" />, type: 'url', dir: 'ltr', hint: 'اللينك اللي المستخدم يروح لما يضغط على اسم المطور في الفوتر' },
 ]
 
 export default function AdminSettings() {
