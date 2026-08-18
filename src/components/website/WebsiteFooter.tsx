@@ -19,6 +19,7 @@ interface Settings {
   instagram?: string;
   developer_name?: string;
   developer_link?: string;
+  site_logo?: string;
 }
 
 export default function WebsiteFooter() {
@@ -66,9 +67,17 @@ export default function WebsiteFooter() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8">
           <div className="sm:col-span-2 lg:col-span-1">
             <div className="flex items-center gap-3 mb-5">
-              <div className="w-11 h-11 rounded-xl gradient-primary flex items-center justify-center shadow-lg shadow-primary/30">
-                <span className="text-white font-extrabold text-xl">E</span>
-              </div>
+              {settings.site_logo ? (
+                <img
+                  src={settings.site_logo}
+                  alt="EMT Logo"
+                  className="w-11 h-11 rounded-xl object-cover shadow-lg shadow-primary/30"
+                />
+              ) : (
+                <div className="w-11 h-11 rounded-xl gradient-primary flex items-center justify-center shadow-lg shadow-primary/30">
+                  <span className="text-white font-extrabold text-xl">E</span>
+                </div>
+              )}
               <div>
                 <span className="text-xl font-extrabold text-white">EMT</span>
                 <p className="text-[10px] text-white/50 leading-none mt-0.5">{t('سياحة علاجية', 'Medical Tourism')}</p>
@@ -119,7 +128,7 @@ export default function WebsiteFooter() {
                 <span className="text-sm" dir="ltr">{displayPhone}</span>
               </a>
               <a href={`mailto:${displayEmail}`} className="flex items-center gap-3 text-white/60 hover:text-white transition-colors group">
-                <div className="w-9 h-9 rounded-lg bg-white/10 hover:bg-emt-gold flex items-center justify-center transition-all duration-300 shrink-0"><Mail className="w-4 h-4" /></div>
+                <div className="w-9 h-9 rounded-lg bg-white/10 hover-hover:bg-emt-gold flex items-center justify-center transition-all duration-300 shrink-0"><Mail className="w-4 h-4" /></div>
                 <span className="text-sm">{displayEmail}</span>
               </a>
             </div>
