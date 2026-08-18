@@ -46,7 +46,6 @@ type Tour = {
 
 type CategoryKey = "religious" | "cairo" | "outside_cairo";
 
-/* صور صغيرة وسريعة */
 const CATEGORIES: { key: CategoryKey; label: string; image: string }[] = [
   {
     key: "religious",
@@ -61,11 +60,10 @@ const CATEGORIES: { key: CategoryKey; label: string; image: string }[] = [
   {
     key: "outside_cairo",
     label: "سياحة خارجية",
-    image: "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/c759d71a6591.jpg",
+    image: "/vacation.png",
   },
 ];
 
-/* خريطة التحميل المسبق - كل الصور اللي اتحملت */
 const preloaded = new Set<string>();
 
 function preloadImage(src: string) {
@@ -75,7 +73,6 @@ function preloadImage(src: string) {
   img.src = src;
 }
 
-/* مكون الصورة - يظهر فوراً لو اتحملت قبل كده */
 function FastImage({ src, alt, className, dim }: { src: string; alt: string; className?: string; dim?: boolean }) {
   const [ok, setOk] = useState(preloaded.has(src));
 
@@ -126,7 +123,6 @@ export default function AdminTours() {
     featured: false,
   });
 
-  /* حمّل الصور فوراً أول ما يفتح الأدمن */
   useEffect(() => {
     CATEGORIES.forEach((c) => preloadImage(c.image));
   }, []);
@@ -139,9 +135,11 @@ export default function AdminTours() {
         fetch("/api/settings"),
       ]);
       const d1 = await r1.json();
-      setTours(d1.tours || []);
+      // FIX: API returns array directly, not { tours: [] }
+      setTours(Array.isArray(d1) ? d1 : (d1.tours || []));
       const d2 = await r2.json();
-      const s = d2.settings || {};
+      // FIX: Settings API returns flat object, not { settings: {} }
+      const s = d2 || {};
       setHidden({
         religious: s.tour_category_hidden_religious === "true",
         cairo: s.tour_category_hidden_cairo === "true",
@@ -254,7 +252,6 @@ export default function AdminTours() {
         </Button>
       </div>
 
-      {/* كروت الأقسام */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {CATEGORIES.map((c) => {
           const isHidden = hidden[c.key];
@@ -283,7 +280,6 @@ export default function AdminTours() {
         })}
       </div>
 
-      {/* قوائم الرحلات */}
       <div className="space-y-4">
         {CATEGORIES.map((c) => (
           <div key={c.key}>
@@ -319,7 +315,6 @@ export default function AdminTours() {
         ))}
       </div>
 
-      {/* نافذة إضافة/تعديل رحلة */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
