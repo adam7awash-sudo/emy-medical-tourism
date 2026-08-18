@@ -17,12 +17,13 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useToast } from '@/hooks/use-toast'
-import { Plus, Trash2, Upload, Loader2, ImageIcon } from 'lucide-react'
+import { Plus, Trash2, Upload, Loader2, ImageIcon, Video, X } from 'lucide-react'
 
-interface GalleryImage {
+interface GalleryItem {
   id: string
   title: string
   image: string
+  videoUrl: string
   category: string
   order: number
 }
@@ -33,22 +34,25 @@ const categories = [
   { value: 'hospital', labelAr: 'مستشفيات', labelEn: 'Hospitals' },
   { value: 'tourism', labelAr: 'سياحة', labelEn: 'Tourism' },
   { value: 'before_after', labelAr: 'قبل وبعد', labelEn: 'Before & After' },
+  { value: 'video', labelAr: 'فيديوهات', labelEn: 'Videos' },
 ]
 
-const emptyForm = { title: '', image: '', category: 'general', order: 0 }
+const emptyForm = { title: '', image: '', videoUrl: '', category: 'general', order: 0 }
 
 export default function AdminGallery() {
   const { t } = useLanguageStore()
   const { toast } = useToast()
-  const [items, setItems] = useState<GalleryImage[]>([])
+  const [items, setItems] = useState<GalleryItem[]>([])
   const [loading, setLoading] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [form, setForm] = useState(emptyForm)
   const [uploading, setUploading] = useState(false)
+  const [uploadingVideo, setUploadingVideo] = useState(false)
   const [saving, setSaving] = useState(false)
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const videoInputRef = useRef<HTMLInputElement>(null)
 
   const fetchItems = useCallback(async () => {
     setLoading(true)
@@ -82,8 +86,32 @@ export default function AdminGallery() {
     finally { setUploading(false); if (fileInputRef.current) fileInputRef.current.value = '' }
   }
 
+  const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploadingVideo(true)
+    try {
+      const fd = new FormData(); fd.append('file', file)
+      const res = await fetch('/api/upload', { method: 'POST', body: fd })
+      if (res.ok) {
+        const data = await res.json()
+        setForm((f) => ({ ...f, videoUrl: data.url }))
+        toast({ title: t('تم رفع الفيديو', 'Video uploaded') })
+      } else {
+        const err = await res.json().catch(() => ({}))
+        toast({ title: t('فشل رفع الفيديو', 'Video upload failed'), description: String(err.error || ''), variant: 'destructive' })
+      }
+    } catch {
+      toast({ title: t('فشل رفع الفيديو', 'Video upload failed'), variant: 'destructive' })
+    }
+    finally { setUploadingVideo(false); if (videoInputRef.current) videoInputRef.current.value = '' }
+  }
+
   const handleSave = async () => {
-    if (!form.image) { toast({ title: t('يرجى رفع صورة', 'Please upload an image'), variant: 'destructive' }); return }
+    if (!form.image && !form.videoUrl) {
+      toast({ title: t('يرجى رفع صورة أو فيديو', 'Please upload an image or video'), variant: 'destructive' })
+      return
+    }
     setSaving(true)
     try {
       const res = await fetch('/api/gallery', {
@@ -109,9 +137,9 @@ export default function AdminGallery() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">{t(`${items.length} صورة`, `${items.length} images`)}</p>
+        <p className="text-sm text-muted-foreground">{t(`${items.length} عنصر في المعرض`, `${items.length} gallery items`)}</p>
         <Button onClick={() => { setForm(emptyForm); setDialogOpen(true) }} size="sm" className="gap-2">
-          <Plus className="w-4 h-4" />{t('إضافة صورة', 'Add Image')}
+          <Plus className="w-4 h-4" />{t('إضافة عنصر', 'Add Item')}
         </Button>
       </div>
 
@@ -120,15 +148,27 @@ export default function AdminGallery() {
           {Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-40 rounded-xl" />)}
         </div>
       ) : items.length === 0 ? (
-        <Card className="border-0 shadow-sm p-10 text-center text-muted-foreground text-sm">{t('لا توجد صور', 'No images yet')}</Card>
+        <Card className="border-0 shadow-sm p-10 text-center text-muted-foreground text-sm">{t('لا توجد عناصر', 'No items yet')}</Card>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {items.map((item) => {
             const cat = categories.find((c) => c.value === item.category)
+            const isVideo = !!item.videoUrl
             return (
               <Card key={item.id} className="border-0 shadow-sm overflow-hidden group relative">
-                <div className="h-40 bg-muted">
-                  <img src={item.image} alt={item.title || ''} className="w-full h-full object-cover" />
+                <div className="h-40 bg-muted relative">
+                  {isVideo ? (
+                    <video src={item.videoUrl} className="w-full h-full object-cover" muted />
+                  ) : (
+                    <img src={item.image} alt={item.title || ''} className="w-full h-full object-cover" />
+                  )}
+                  {isVideo && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-10 h-10 rounded-full bg-red-500/90 flex items-center justify-center">
+                        <Video className="w-5 h-5 text-white" />
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-end justify-between p-3 opacity-0 group-hover:opacity-100">
                   <div>
@@ -139,10 +179,6 @@ export default function AdminGallery() {
                     <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>
-                <CardContent className="p-3 hidden group-hover:hidden">
-                  <p className="text-sm font-medium truncate">{item.title}</p>
-                  {cat && <p className="text-xs text-muted-foreground">{t(cat.labelAr, cat.labelEn)}</p>}
-                </CardContent>
               </Card>
             )
           })}
@@ -152,7 +188,7 @@ export default function AdminGallery() {
       {/* Upload Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-md">
-          <DialogHeader><DialogTitle>{t('إضافة صورة للمعرض', 'Add Gallery Image')}</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{t('إضافة عنصر للمعرض', 'Add Gallery Item')}</DialogTitle></DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>{t('العنوان', 'Title')}</Label>
@@ -173,10 +209,23 @@ export default function AdminGallery() {
               <Label>{t('الترتيب', 'Order')}</Label>
               <Input type="number" value={form.order} onChange={(e) => setForm({ ...form, order: parseInt(e.target.value) || 0 })} />
             </div>
+
+            {/* Image Upload */}
             <div className="space-y-2">
-              <Label>{t('الصورة', 'Image')} *</Label>
+              <Label>{t('الصورة (اختياري - أو صورة مصغرة للفيديو)', 'Image (optional - or video thumbnail)')}</Label>
               <div className="flex items-center gap-3">
-                {form.image && <img src={form.image} alt="preview" className="w-20 h-20 rounded-lg object-cover border" />}
+                {form.image && (
+                  <div className="relative">
+                    <img src={form.image} alt="preview" className="w-20 h-20 rounded-lg object-cover border" />
+                    <button
+                      type="button"
+                      onClick={() => setForm({ ...form, image: '' })}
+                      className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                )}
                 <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
                 <Button type="button" variant="outline" size="sm" disabled={uploading} className="gap-2" onClick={() => fileInputRef.current?.click()}>
                   {uploading ? <><Loader2 className="w-4 h-4 animate-spin" />{t('جاري الرفع...', 'Uploading...')}</> : <><Upload className="w-4 h-4" />{t('رفع صورة', 'Upload Image')}</>}
@@ -194,6 +243,41 @@ export default function AdminGallery() {
                 />
               </div>
             </div>
+
+            {/* Video Upload */}
+            <div className="space-y-2">
+              <Label>{t('الفيديو (اختياري)', 'Video (optional)')}</Label>
+              <div className="flex items-center gap-3">
+                {form.videoUrl && (
+                  <div className="relative">
+                    <video src={form.videoUrl} className="w-20 h-14 rounded-lg object-cover border" />
+                    <button
+                      type="button"
+                      onClick={() => setForm({ ...form, videoUrl: '' })}
+                      className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                )}
+                <input ref={videoInputRef} type="file" accept="video/*" className="hidden" onChange={handleVideoUpload} />
+                <Button type="button" variant="outline" size="sm" disabled={uploadingVideo} className="gap-2" onClick={() => videoInputRef.current?.click()}>
+                  {uploadingVideo ? <><Loader2 className="w-4 h-4 animate-spin" />{t('جاري الرفع...', 'Uploading...')}</> : <><Video className="w-4 h-4" />{t('رفع فيديو', 'Upload Video')}</>}
+                </Button>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs text-muted-foreground">{t('أو أدخل رابط الفيديو:', 'Or enter video URL:')}</Label>
+                <Input
+                  value={form.videoUrl}
+                  onChange={(e) => setForm({ ...form, videoUrl: e.target.value })}
+                  dir="ltr"
+                  className="text-sm font-en"
+                  placeholder="https://..."
+                  onKeyDown={(e) => e.stopPropagation()}
+                />
+              </div>
+            </div>
+
             <DialogFooter>
               <Button variant="outline" onClick={() => setDialogOpen(false)}>{t('إلغاء', 'Cancel')}</Button>
               <Button onClick={handleSave} disabled={saving}>
@@ -208,7 +292,7 @@ export default function AdminGallery() {
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t('حذف الصورة', 'Delete Image')}</AlertDialogTitle>
+            <AlertDialogTitle>{t('حذف العنصر', 'Delete Item')}</AlertDialogTitle>
             <AlertDialogDescription>{t('هل أنت متأكد من الحذف؟', 'Are you sure?')}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
