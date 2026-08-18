@@ -45,7 +45,7 @@ const CATEGORIES: { key: CategoryKey; label: string; description: string; image:
     key: "outside_cairo",
     label: "سياحة خارجية",
     description: "رحلات دولية إلى أجمل الوجهات العالمية",
-    image: "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/c759d71a6591.jpg",
+    image: "/vacation.png",
   },
 ];
 
@@ -96,9 +96,11 @@ export default function ToursSection() {
       try {
         const [r1, r2] = await Promise.all([fetch("/api/tours"), fetch("/api/settings")]);
         const d1 = await r1.json();
-        setTours(d1.tours || []);
+        // FIX: API returns array directly, not { tours: [] }
+        setTours(Array.isArray(d1) ? d1 : (d1.tours || []));
         const d2 = await r2.json();
-        const s = d2.settings || {};
+        // FIX: Settings API returns flat object, not { settings: {} }
+        const s = d2 || {};
         setHidden({
           religious: s.tour_category_hidden_religious === "true",
           cairo: s.tour_category_hidden_cairo === "true",
