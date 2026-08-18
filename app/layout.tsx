@@ -1,41 +1,32 @@
-import type { Metadata } from "next";
-import { Cairo, Inter } from "next/font/google";
-import "./globals.css";
-import { Toaster } from "@/components/ui/toaster";
+import Link from 'next/link';
+import './globals.css';
 
-const cairo = Cairo({
-  variable: "--font-cairo",
-  subsets: ["arabic", "latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
-});
+export default function RootLayout({ children }) {
+  // دي اللينكات اللي تقدر لاحقاً تجيبها من قاعدة البيانات أو صفحة الأدمن
+  const developerLink = "https://your-admin-link.com"; 
 
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-});
-
-export const metadata: Metadata = {
-  title: "EMT - Emy Medical Tourism | السياحة العلاجية في مصر",
-  description: "EMT - شركة إيمي للسياحة العلاجية. نساعد المرضى من العراق وجميع الدول العربية للوصول إلى أفضل الأطباء والعيادات المتخصصة في مصر.",
-  keywords: ["سياحة علاجية", "مصر", "علاج في مصر", "EMT", "أطباء مصر", "عيادات مصر"],
-  openGraph: {
-    title: "EMT - Emy Medical Tourism",
-    description: "Medical Tourism Coordination - Connecting patients with the best doctors in Egypt",
-    type: "website",
-  },
-};
-
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
   return (
-    <html lang="ar" dir="rtl" suppressHydrationWarning>
-      <body className={`${cairo.variable} ${inter.variable} font-sans antialiased`}>
-        {children}
-        <Toaster />
+    <html lang="ar" dir="rtl">
+      <body>
+        {/* التوقيع العلوي */}
+        <header className="bg-slate-900 text-white p-3 text-center text-sm flex justify-around">
+          <Link href={developerLink} className="hover:underline text-indigo-400 font-bold">
+            Made by Adam Hawash
+          </Link>
+          <Link href={developerLink} className="hover:underline text-indigo-400 font-bold">
+            Hero Developer
+          </Link>
+        </header>
+
+        {/* محتوى الموقع الأساسي */}
+        <main>{children}</main>
+
+        {/* التوقيع السفلي */}
+        <footer className="bg-slate-900 text-white p-4 text-center text-sm">
+          <Link href={developerLink} className="hover:underline text-indigo-400 font-bold">
+            Hero Developer
+          </Link>
+        </footer>
       </body>
     </html>
   );
