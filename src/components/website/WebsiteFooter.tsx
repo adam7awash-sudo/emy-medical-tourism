@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useLanguageStore } from '@/store/language-store';
 import { getWhatsAppLink, WHATSAPP_DEFAULT, EMAIL_DEFAULT } from '@/lib/utils';
-import { Facebook, Instagram, MessageCircle, Phone, Mail, ArrowUp } from 'lucide-react';
+import { Facebook, Instagram, MessageCircle, Phone, Mail, ArrowUp, ExternalLink } from 'lucide-react';
 
 interface Specialty {
   id: string;
@@ -17,6 +17,8 @@ interface Settings {
   email?: string;
   facebook?: string;
   instagram?: string;
+  developer_name?: string;
+  developer_link?: string;
 }
 
 export default function WebsiteFooter() {
@@ -54,6 +56,8 @@ export default function WebsiteFooter() {
 
   const displayPhone = settings.phone || settings.whatsapp || WHATSAPP_DEFAULT;
   const displayEmail = settings.email || EMAIL_DEFAULT;
+  const developerName = settings.developer_name || 'Adam Hawash';
+  const developerLink = settings.developer_link || 'https://wa.me/201000000000';
 
   return (
     <footer className="relative bg-slate-900 text-white">
@@ -195,6 +199,17 @@ export default function WebsiteFooter() {
       {/* Copyright */}
       <div className="border-t border-white/10">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 py-5">
+          {/* Made by Adam Hawash */}
+          <a
+            href={developerLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-1.5 text-white/50 hover:text-emt-gold text-sm transition-colors duration-300 mb-2"
+          >
+            <span>Made by</span>
+            <span className="font-semibold">{developerName}</span>
+            <ExternalLink className="w-3 h-3" />
+          </a>
           <p className="text-center text-white/40 text-sm">
             © {new Date().getFullYear()} EMT - {t('إيمي للسياحة العلاجية. جميع الحقوق محفوظة.', 'Emy Medical Tourism. All rights reserved.')}
           </p>
