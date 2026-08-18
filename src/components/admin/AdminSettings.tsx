@@ -81,27 +81,15 @@ export default function AdminSettings() {
           {saving && <Loader2 className="w-4 h-4 animate-spin" />}
         </Button>
       </div>
-
       {fields.map((field) => (
         <Card key={field.key} className="border-0 shadow-sm">
           <CardContent className="p-5">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center shrink-0">
-                {field.icon}
-              </div>
+              <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center shrink-0">{field.icon}</div>
               <div className="flex-1 space-y-1.5">
                 <Label className="text-sm font-medium">{t(field.labelAr, field.labelEn)}</Label>
-                <Input
-                  value={values[field.key] || ''}
-                  onChange={(e) => setValues({ ...values, [field.key]: e.target.value })}
-                  type={field.type}
-                  dir={field.dir || 'rtl'}
-                  placeholder={field.type === 'url' ? 'https://...' : ''}
-                  className="text-sm"
-                />
-                {field.hint && (
-                  <p className="text-xs text-muted-foreground mt-1">{t(field.hint, field.hint)}</p>
-                )}
+                <Input value={values[field.key] || ''} onChange={(e) => setValues({ ...values, [field.key]: e.target.value })} type={field.type} dir={field.dir || 'rtl'} placeholder={field.type === 'url' ? 'https://...' : ''} className="text-sm" />
+                {field.hint && <p className="text-xs text-muted-foreground mt-1">{t(field.hint, field.hint)}</p>}
               </div>
             </div>
           </CardContent>
