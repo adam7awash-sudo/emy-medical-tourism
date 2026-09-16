@@ -40,6 +40,13 @@ function extFrom(name: string, mime: string): string {
   return found ? found[0] : "bin";
 }
 
+/** تأكيد إن فيه تخزين متاح قبل أي عملية (Blob أو قاعدة بيانات) */
+export function assertDbConfigured(): void {
+  if (process.env.BLOB_READ_WRITE_TOKEN) return;
+  if (process.env.DATABASE_URL) return;
+  throw new Error("STORAGE_UNCONFIGURED");
+}
+
 /** تخزين الـ buffer: Blob إن أمكن وإلا قاعدة البيانات */
 export async function storeBuffer(
   buffer: Buffer,
@@ -62,7 +69,8 @@ export async function storeBuffer(
     }
   }
 
-  // التخزين الاحتياطي في قاعدة البيانات
+  // التخزين الاحتياطي في قاعدة البيانات — لو مش مضبوطة نرمي رسالة واضحة
+  assertDbConfigured();
   const id = crypto.randomBytes(12).toString("hex");
   await db.siteSetting.create({
     data: {
@@ -72,6 +80,14 @@ export async function storeBuffer(
     },
   });
   return { url: `/api/files/${id}`, storage: "db" };
+}
+
+/** تحويل أخطاء التخزين لرسالة مفهومة */
+export function storageErrorMessage(err: unknown): string {
+  if (err instanceof Error && err.message === "STORAGE_UNCONFIGURED") {
+    return "لا يوجد تخزين مضبوط على السيرفر — أضف DATABASE_URL (Neon Postgres) أو BLOB_READ_WRITE_TOKEN في إعدادات Vercel | Server storage not configured";
+  }
+  return "Upload failed";
 }
 
 /** تنظيف قطع الرفع القديمة (أكبر من 24 ساعة) */

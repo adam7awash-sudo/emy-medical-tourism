@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   storeBuffer, cleanupStaleChunks, mimeAllowed, mimeFromName,
-  MAX_FILE, CHUNK_SIZE_LIMIT,
+  MAX_FILE, CHUNK_SIZE_LIMIT, storageErrorMessage, assertDbConfigured,
 } from "@/lib/media-storage";
 
 export const runtime = "nodejs";
@@ -27,6 +27,9 @@ export async function POST(request: NextRequest) {
       if (!chunk) return NextResponse.json({ error: "No chunk" }, { status: 400 });
       if (chunk.size > CHUNK_SIZE_LIMIT) {
         return NextResponse.json({ error: "Chunk too large" }, { status: 400 });
+      }
+      try { assertDbConfigured(); } catch (e) {
+        return NextResponse.json({ error: storageErrorMessage(e) }, { status: 500 });
       }
       const index = parseInt(indexRaw, 10);
       if (isNaN(index) || index < 0 || index > 200) {
@@ -62,7 +65,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, url, storage, mimeType: mime });
   } catch (error) {
     console.error("Upload error:", error);
-    return NextResponse.json({ error: "Upload failed" }, { status: 500 });
+    return NextResponse.json({ error: storageErrorMessage(error) }, { status: 500 });
   }
 }
 

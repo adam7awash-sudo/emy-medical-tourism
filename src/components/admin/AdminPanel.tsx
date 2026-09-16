@@ -40,6 +40,15 @@ export default function AdminPanel({ onLogout }: AdminPanelProps) {
   const { toast } = useToast()
   const [activeSection, setActiveSection] = useState<AdminSection>('dashboard')
   const [justLoggedIn, setJustLoggedIn] = useState(false)
+  const [dbStatus, setDbStatus] = useState<'checking' | 'ok' | 'down'>('checking')
+
+  // فحص الاتصال بقاعدة البيانات — لو مقطوع نحذّر المسؤول فورًا بدل رسايل غامضة
+  useEffect(() => {
+    if (!isAuthenticated) return
+    fetch('/api/settings')
+      .then((r) => setDbStatus(r.ok ? 'ok' : 'down'))
+      .catch(() => setDbStatus('down'))
+  }, [isAuthenticated])
 
   const handleLogin = () => {
     setJustLoggedIn(true)
@@ -75,6 +84,18 @@ export default function AdminPanel({ onLogout }: AdminPanelProps) {
       onLogout={handleLogout}
       skipInitialCheck={justLoggedIn}
     >
+      {dbStatus === 'down' && (
+        <div className="mb-4 rounded-xl border border-red-300 bg-red-50 p-4 text-sm text-red-800" dir="rtl">
+          <p className="font-bold mb-1">⚠️ الاتصال بقاعدة البيانات مقطوع — الحفظ والرفع مش هيشتغلوا</p>
+          <p>
+            الحل: من لوحة Vercel افتح المشروع ← Settings ← Environment Variables، وضيف
+            <code className="mx-1 rounded bg-red-100 px-1.5 py-0.5 font-en" dir="ltr">DATABASE_URL</code>
+            و
+            <code className="mx-1 rounded bg-red-100 px-1.5 py-0.5 font-en" dir="ltr">DIRECT_URL</code>
+            (Neon Postgres)، وبعدين اعمل Redeploy.
+          </p>
+        </div>
+      )}
       <ActiveComponent />
     </AdminLayout>
   )

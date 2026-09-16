@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { storeBuffer, MAX_FILE, cleanupStaleChunks } from "@/lib/media-storage";
+import { storeBuffer, MAX_FILE, cleanupStaleChunks, storageErrorMessage } from "@/lib/media-storage";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -56,6 +56,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, url, storage, mimeType: mime });
   } catch (error) {
     console.error("Finalize error:", error);
-    return NextResponse.json({ error: "Finalize failed" }, { status: 500 });
+    return NextResponse.json({ error: storageErrorMessage(error) }, { status: 500 });
   }
 }
