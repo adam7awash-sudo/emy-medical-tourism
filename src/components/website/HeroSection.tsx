@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useLanguageStore } from '@/store/language-store';
 import { getWhatsAppLink } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Plane, Heart, Stethoscope, Shield, ChevronDown, MessageCircle, CalendarPlus, Users, Award, Smile } from 'lucide-react';
+import { Plane, Heart, Stethoscope, Shield, ChevronDown, MessageCircle, CalendarPlus, Users, Award, Smile, Code2 } from 'lucide-react';
 
 interface HomepageData {
   ar?: string;
@@ -117,6 +117,9 @@ export default function HeroSection() {
         <img
           src={content.bgImage}
           alt=""
+          fetchPriority="high"
+          loading="eager"
+          decoding="async"
           className="w-full h-full object-cover"
           onError={(e) => {
             (e.target as HTMLImageElement).style.display = 'none';
@@ -193,6 +196,30 @@ export default function HeroSection() {
                 <CalendarPlus className="w-5 h-5" />
                 {t('احجز الآن', 'Book Now')}
               </Button>
+            </div>
+
+            {/* Prime Developer / Adam Hawash branding */}
+            <div
+              className={`pt-5 flex flex-col items-center lg:items-start gap-1 transition-all duration-1000 delay-500 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+            >
+              <a
+                href="https://prime-developer-portfolio-11.vercel.app"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-sm font-semibold text-white/70 hover:text-emt-gold transition-colors"
+              >
+                <Code2 className="w-4 h-4" />
+                <span dir="ltr">Prime Developer</span>
+              </a>
+              <a
+                href="https://prime-developer-portfolio-11.vercel.app"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-white/45 hover:text-white/80 transition-colors"
+                dir="ltr"
+              >
+                Developed by Adam Hawash
+              </a>
             </div>
           </div>
 

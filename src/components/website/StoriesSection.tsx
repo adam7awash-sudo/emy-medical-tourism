@@ -124,6 +124,8 @@ export default function StoriesSection() {
                     <div className="relative">
                       {story.image ? (
                         <img
+                  loading="lazy"
+                  decoding="async"
                           src={story.image}
                           alt={t(story.nameAr, story.nameEn)}
                           className="w-14 h-14 rounded-full object-cover border-4 border-primary/20"

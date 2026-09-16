@@ -116,6 +116,8 @@ export default function DoctorsSection() {
                 <div className="h-64 relative overflow-hidden gradient-primary">
                   {doctor.image ? (
                     <img
+                  loading="lazy"
+                  decoding="async"
                       src={doctor.image}
                       alt={t(doctor.nameAr, doctor.nameEn)}
                       className="w-full h-full object-cover"

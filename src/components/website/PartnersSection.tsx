@@ -77,6 +77,8 @@ export default function PartnersSection() {
                 <div className="w-full h-20 flex items-center justify-center mb-3">
                   {partner.logo ? (
                     <img
+                  loading="lazy"
+                  decoding="async"
                       src={partner.logo}
                       alt={partner.name}
                       className="max-w-full max-h-full object-contain transition-transform duration-300 group-hover:scale-105"

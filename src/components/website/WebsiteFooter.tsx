@@ -76,6 +76,8 @@ export default function WebsiteFooter() {
               <img
                 src={logoSrc}
                 alt="EMY Medical Tourism Logo"
+                loading="lazy"
+                decoding="async"
                 className="h-11 w-auto rounded-xl object-contain shadow-lg shadow-primary/30"
               />
               <div>
@@ -140,7 +142,7 @@ export default function WebsiteFooter() {
           <a href={developerLink} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-1.5 text-white/50 hover:text-emt-gold text-sm transition-colors duration-300 mb-2">
             <span>Developed by</span>
             <span className="font-semibold" dir="ltr">{developerName}</span>
-            <span>— Brand Developer</span>
+            <span>— Prime Developer</span>
             <ExternalLink className="w-3 h-3" />
           </a>
           <p className="text-center text-white/40 text-sm">

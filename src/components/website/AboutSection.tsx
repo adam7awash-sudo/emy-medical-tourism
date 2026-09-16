@@ -141,6 +141,8 @@ export default function AboutSection() {
             <div className="relative">
               <div className="rounded-3xl overflow-hidden shadow-2xl shadow-blue-100/50 aspect-[3/4] max-w-md mx-auto lg:mx-0">
                 <img
+                  loading="lazy"
+                  decoding="async"
                   src={content.founderImage}
                   alt={c(content.founderName)}
                   className="w-full h-full object-cover"
@@ -153,8 +155,30 @@ export default function AboutSection() {
                 />
               </div>
               {/* Decorative element */}
-              <div className="absolute -bottom-4 -left-4 w-24 h-24 rounded-2xl bg-emt-gold/10 -z-10" />
               <div className="absolute -top-4 -right-4 w-16 h-16 rounded-xl bg-secondary -z-10" />
+              {/* Prime Developer badge (كان مربع فاضي — بقى شعار المطور) */}
+              <a
+                href="https://prime-developer-portfolio-11.vercel.app"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Prime Developer — Developer Portfolio"
+                className="absolute -bottom-5 -left-5 z-10 group"
+                aria-label="Prime Developer portfolio"
+              >
+                <div className="flex flex-col items-center gap-1.5 bg-white rounded-2xl shadow-xl shadow-blue-100/60 border border-border/40 px-3.5 py-2.5 transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-2xl">
+                  <img
+                    src="/prime-developer.png"
+                    alt="Prime Developer"
+                    className="w-14 h-14 rounded-xl object-cover"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <div className="text-center leading-tight">
+                    <p className="text-[10px] font-bold text-primary" dir="ltr">Prime Developer</p>
+                    <p className="text-[9px] text-muted-foreground" dir="ltr">Adam Hawash</p>
+                  </div>
+                </div>
+              </a>
             </div>
             {/* Founder Info Card */}
             <div className="mt-8 text-center lg:text-right max-w-md mx-auto lg:mx-0">

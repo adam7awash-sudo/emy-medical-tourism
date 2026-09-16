@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { sendBookingNotificationEmail } from "@/lib/email";
+import { ensureSchema } from "@/lib/ensure-schema";
 
 export async function GET(request: NextRequest) {
   try {
+    await ensureSchema();
     const { searchParams } = new URL(request.url);
     const search = searchParams.get("search") || "";
     const status = searchParams.get("status") || "";
@@ -37,6 +39,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    await ensureSchema();
     const body = await request.json();
     const booking = await db.booking.create({
       data: {

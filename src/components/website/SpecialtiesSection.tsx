@@ -161,6 +161,8 @@ export default function SpecialtiesSection() {
                 {/* Background Image - renders on top of fallback */}
                 <div className="absolute inset-0 z-[1]">
                   <img
+                  loading="lazy"
+                  decoding="async"
                     src={specialty.image || `/uploads/specialty-${slug}.png`}
                     alt={name}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"

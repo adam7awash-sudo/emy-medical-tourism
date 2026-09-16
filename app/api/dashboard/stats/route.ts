@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { ensureSchema } from "@/lib/ensure-schema";
 
 export async function GET() {
   try {
+    await ensureSchema();
     const [totalBookings, pendingBookings, contactedBookings, scheduledBookings, waitingBookings, completedBookings, totalDoctors, totalSpecialties, totalStories, totalPartners] = await Promise.all([
       db.booking.count(),
       db.booking.count({ where: { status: "pending" } }),

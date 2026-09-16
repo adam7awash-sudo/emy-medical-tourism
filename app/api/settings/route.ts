@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { ensureSchema } from "@/lib/ensure-schema";
 
 export async function GET() {
   try {
+    await ensureSchema();
     const settings = await db.siteSetting.findMany();
     const map: Record<string, string> = {};
     settings.forEach((s) => { map[s.key] = s.value; });
@@ -14,6 +16,7 @@ export async function GET() {
 
 export async function PUT(request: NextRequest) {
   try {
+    await ensureSchema();
     const body = await request.json();
     const items = Array.isArray(body) ? body : [body];
     for (const item of items) {

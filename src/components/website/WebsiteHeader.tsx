@@ -76,7 +76,7 @@ export default function WebsiteHeader() {
         className="block w-full bg-slate-900 text-center py-1.5 text-[11px] text-white/70 hover:text-white transition-colors"
         title="Developer Portfolio"
       >
-        Developed by <span className="font-semibold" dir="ltr">Adam Hawash</span> — Brand Developer
+        Developed by <span className="font-semibold" dir="ltr">Adam Hawash</span> — Prime Developer
       </a>
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">

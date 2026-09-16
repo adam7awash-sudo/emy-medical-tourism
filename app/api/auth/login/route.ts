@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { ensureSchema } from "@/lib/ensure-schema";
 import { verifyPassword, generateSessionToken } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
   try {
+    await ensureSchema();
     const { email, password } = await request.json();
     if (!email || !password) {
       return NextResponse.json({ error: "Email and password required" }, { status: 400 });

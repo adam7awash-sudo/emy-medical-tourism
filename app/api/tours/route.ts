@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { ensureSchema } from "@/lib/ensure-schema";
 
 export async function GET(request: NextRequest) {
   try {
+    await ensureSchema();
     const { searchParams } = new URL(request.url);
     const category = searchParams.get("category");
 
@@ -23,6 +25,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    await ensureSchema();
     const body = await request.json();
     const tour = await db.tour.create({ data: body });
     return NextResponse.json({ success: true, tour }, { status: 201 });

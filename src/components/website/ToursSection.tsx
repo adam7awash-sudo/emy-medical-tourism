@@ -73,6 +73,8 @@ function FastImg({ src, alt, className, eager }: { src: string; alt: string; cla
     <div className={`relative bg-gray-200 ${className || ""}`}>
       {!ok && <div className="absolute inset-0 bg-gray-200 animate-pulse" />}
       <img src={src} alt={alt}
+        loading="lazy"
+        decoding="async"
         className={`h-full w-full object-cover transition-opacity duration-200 ${ok ? "opacity-100" : "opacity-0"}`}
       />
     </div>

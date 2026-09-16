@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useToast } from '@/hooks/use-toast'
-import { Save, Loader2, Phone, Mail, MessageCircle, Facebook, Instagram, Key, Code, Link, ImageIcon, Upload, X } from 'lucide-react'
+import { Save, Loader2, Phone, Mail, MessageCircle, Facebook, Instagram, Key, Code, Link, ImageIcon, Upload, X, Database, Download } from 'lucide-react'
 
 interface SettingField {
   key: string
@@ -101,6 +101,48 @@ export default function AdminSettings() {
           {saving && <Loader2 className="w-4 h-4 animate-spin" />}
         </Button>
       </div>
+
+      {/* قاعدة البيانات — النسخة الاحتياطية ومكانها */}
+      <Card className="border-0 shadow-sm">
+        <CardContent className="p-5">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+              <Database className="w-5 h-5 text-primary" />
+            </div>
+            <div className="flex-1 space-y-2">
+              <Label className="text-sm font-medium">{t('قاعدة البيانات — نسخة احتياطية', 'Database — Backup')}</Label>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                {t(
+                  'اضغط الزر لتحميل ملف JSON فيه كل بيانات الموقع (الحجوزات، الأطباء، المعرض، الإعدادات...) احفظه عندك في مكان آمن. مكان القاعدة الأصلي: vercel.com → مشروعك → Settings → Environment Variables → DATABASE_URL',
+                  'Download a full JSON backup of all site data and keep it safe. Database location: vercel.com → your project → Settings → Environment Variables → DATABASE_URL'
+                )}
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2"
+                onClick={async () => {
+                  try {
+                    const res = await fetch('/api/backup')
+                    if (!res.ok) throw new Error('فشل التحميل — اتأكد إنك مسجل دخول كأدمن')
+                    const blob = await res.blob()
+                    const a = document.createElement('a')
+                    a.href = URL.createObjectURL(blob)
+                    a.download = `emt-backup-${new Date().toISOString().slice(0, 10)}.json`
+                    a.click()
+                    URL.revokeObjectURL(a.href)
+                  } catch (e) {
+                    alert(e instanceof Error ? e.message : 'فشل التحميل')
+                  }
+                }}
+              >
+                <Download className="w-4 h-4" />
+                {t('تحميل نسخة احتياطية كاملة', 'Download full backup')}
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Logo Upload Card - Special Design */}
       <Card className="border-0 shadow-sm">

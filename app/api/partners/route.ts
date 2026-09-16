@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { ensureSchema } from "@/lib/ensure-schema";
 
 export async function GET() {
   try {
+    await ensureSchema();
     const partners = await db.partner.findMany({ where: { active: true }, orderBy: { order: "asc" } });
     return NextResponse.json(partners);
   } catch {
@@ -12,6 +14,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    await ensureSchema();
     const body = await request.json();
     const partner = await db.partner.create({ data: body });
     return NextResponse.json({ success: true, partner }, { status: 201 });
