@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useLanguageStore } from '@/store/language-store'
+import { uploadFile } from '@/lib/upload-client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -57,16 +58,9 @@ export default function AdminSettings() {
     if (!file) return
     setUploadingLogo(true)
     try {
-      const fd = new FormData()
-      fd.append('file', file)
-      const res = await fetch('/api/upload', { method: 'POST', body: fd })
-      if (res.ok) {
-        const data = await res.json()
-        setValues((prev) => ({ ...prev, site_logo: data.url }))
-        toast({ title: t('تم رفع الشعار', 'Logo uploaded') })
-      } else {
-        toast({ title: t('فشل رفع الشعار', 'Logo upload failed'), variant: 'destructive' })
-      }
+      const url = await uploadFile(file)
+      setValues((prev) => ({ ...prev, site_logo: url }))
+      toast({ title: t('تم رفع الشعار', 'Logo uploaded') })
     } catch {
       toast({ title: t('فشل رفع الشعار', 'Logo upload failed'), variant: 'destructive' })
     } finally {

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useLanguageStore } from '@/store/language-store'
+import { uploadFile } from '@/lib/upload-client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -70,18 +71,11 @@ export default function AdminGallery() {
     if (!file) return
     setUploading(true)
     try {
-      const fd = new FormData(); fd.append('file', file)
-      const res = await fetch('/api/upload', { method: 'POST', body: fd })
-      if (res.ok) {
-        const data = await res.json()
-        setForm((f) => ({ ...f, image: data.url }))
-        toast({ title: t('تم رفع الصورة', 'Image uploaded') })
-      } else {
-        const err = await res.json().catch(() => ({}))
-        toast({ title: t('فشل رفع الصورة', 'Upload failed'), description: String(err.error || ''), variant: 'destructive' })
-      }
-    } catch {
-      toast({ title: t('فشل رفع الصورة', 'Upload failed'), variant: 'destructive' })
+      const url = await uploadFile(file)
+      setForm((f) => ({ ...f, image: url }))
+      toast({ title: t('تم رفع الصورة', 'Image uploaded') })
+    } catch (err) {
+      toast({ title: t('فشل رفع الصورة', 'Upload failed'), description: err instanceof Error ? err.message : '', variant: 'destructive' })
     }
     finally { setUploading(false); if (fileInputRef.current) fileInputRef.current.value = '' }
   }
@@ -91,18 +85,11 @@ export default function AdminGallery() {
     if (!file) return
     setUploadingVideo(true)
     try {
-      const fd = new FormData(); fd.append('file', file)
-      const res = await fetch('/api/upload', { method: 'POST', body: fd })
-      if (res.ok) {
-        const data = await res.json()
-        setForm((f) => ({ ...f, videoUrl: data.url }))
-        toast({ title: t('تم رفع الفيديو', 'Video uploaded') })
-      } else {
-        const err = await res.json().catch(() => ({}))
-        toast({ title: t('فشل رفع الفيديو', 'Video upload failed'), description: String(err.error || ''), variant: 'destructive' })
-      }
-    } catch {
-      toast({ title: t('فشل رفع الفيديو', 'Video upload failed'), variant: 'destructive' })
+      const url = await uploadFile(file)
+      setForm((f) => ({ ...f, videoUrl: url }))
+      toast({ title: t('تم رفع الفيديو', 'Video uploaded') })
+    } catch (err) {
+      toast({ title: t('فشل رفع الفيديو', 'Video upload failed'), description: err instanceof Error ? err.message : '', variant: 'destructive' })
     }
     finally { setUploadingVideo(false); if (videoInputRef.current) videoInputRef.current.value = '' }
   }

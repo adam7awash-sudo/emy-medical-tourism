@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useLanguageStore } from '@/store/language-store'
+import { uploadFile } from '@/lib/upload-client'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
@@ -229,20 +230,12 @@ export default function AdminHomepage() {
   const handleUpload = useCallback(async (key: string, file: File) => {
     setUploadingKey(key)
     try {
-      const fd = new FormData()
-      fd.append('file', file)
-      const res = await fetch('/api/upload', { method: 'POST', body: fd })
-      if (res.ok) {
-        const data = await res.json()
-        updateField(key, 'ar', data.url)
-        updateField(key, 'en', data.url)
-        toast({ title: t('تم رفع الصورة بنجاح', 'Image uploaded') })
-      } else {
-        const err = await res.json().catch(() => ({}))
-        toast({ title: t('فشل رفع الصورة', 'Upload failed'), description: String(err.error || ''), variant: 'destructive' })
-      }
-    } catch {
-      toast({ title: t('فشل رفع الصورة', 'Upload failed'), variant: 'destructive' })
+      const url = await uploadFile(file)
+      updateField(key, 'ar', url)
+      updateField(key, 'en', url)
+      toast({ title: t('تم رفع الصورة بنجاح', 'Image uploaded') })
+    } catch (err) {
+      toast({ title: t('فشل رفع الصورة', 'Upload failed'), description: err instanceof Error ? err.message : '', variant: 'destructive' })
     } finally {
       setUploadingKey(null)
     }

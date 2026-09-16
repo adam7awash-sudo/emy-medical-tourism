@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useLanguageStore } from '@/store/language-store';
+import { uploadFile } from '@/lib/upload-client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -127,11 +128,8 @@ export default function BookingForm() {
       const uploadedUrls: string[] = [];
       for (const file of files) {
         try {
-          const uploadData = new FormData();
-          uploadData.append('file', file);
-          const uploadRes = await fetch('/api/upload', { method: 'POST', body: uploadData });
-          const uploadJson = await uploadRes.json();
-          if (uploadJson.url) uploadedUrls.push(uploadJson.url);
+          const url = await uploadFile(file);
+          uploadedUrls.push(url);
         } catch {
           // Skip failed uploads, don't block the whole form
         }

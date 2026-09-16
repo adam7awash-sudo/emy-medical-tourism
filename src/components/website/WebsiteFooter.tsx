@@ -22,6 +22,8 @@ interface Settings {
   site_logo?: string;
 }
 
+const DEVELOPER_PORTFOLIO = 'https://prime-developer-portfolio-11.vercel.app';
+
 export default function WebsiteFooter() {
   const { t, lang } = useLanguageStore();
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
@@ -58,7 +60,11 @@ export default function WebsiteFooter() {
   const displayPhone = settings.phone || settings.whatsapp || WHATSAPP_DEFAULT;
   const displayEmail = settings.email || EMAIL_DEFAULT;
   const developerName = settings.developer_name || 'Adam Hawash';
-  const developerLink = settings.developer_link || 'https://wa.me/201000000000';
+  const developerLink =
+    settings.developer_link && !settings.developer_link.includes('201000000000')
+      ? settings.developer_link
+      : DEVELOPER_PORTFOLIO;
+  const logoSrc = settings.site_logo || '/logo.png';
 
   return (
     <footer className="relative bg-slate-900 text-white">
@@ -67,17 +73,11 @@ export default function WebsiteFooter() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8">
           <div className="sm:col-span-2 lg:col-span-1">
             <div className="flex items-center gap-3 mb-5">
-              {settings.site_logo ? (
-                <img
-                  src={settings.site_logo}
-                  alt="EMT Logo"
-                  className="w-11 h-11 rounded-xl object-cover shadow-lg shadow-primary/30"
-                />
-              ) : (
-                <div className="w-11 h-11 rounded-xl gradient-primary flex items-center justify-center shadow-lg shadow-primary/30">
-                  <span className="text-white font-extrabold text-xl">E</span>
-                </div>
-              )}
+              <img
+                src={logoSrc}
+                alt="EMY Medical Tourism Logo"
+                className="h-11 w-auto rounded-xl object-contain shadow-lg shadow-primary/30"
+              />
               <div>
                 <span className="text-xl font-extrabold text-white">EMT</span>
                 <p className="text-[10px] text-white/50 leading-none mt-0.5">{t('سياحة علاجية', 'Medical Tourism')}</p>
@@ -138,8 +138,9 @@ export default function WebsiteFooter() {
       <div className="border-t border-white/10">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 py-5">
           <a href={developerLink} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-1.5 text-white/50 hover:text-emt-gold text-sm transition-colors duration-300 mb-2">
-            <span>Made by</span>
-            <span className="font-semibold">{developerName}</span>
+            <span>Developed by</span>
+            <span className="font-semibold" dir="ltr">{developerName}</span>
+            <span>— Brand Developer</span>
             <ExternalLink className="w-3 h-3" />
           </a>
           <p className="text-center text-white/40 text-sm">

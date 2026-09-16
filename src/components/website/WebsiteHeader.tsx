@@ -18,20 +18,16 @@ const navLinks = [
   { key: 'contact', ar: 'تواصل معنا', en: 'Contact', href: '#contact' },
 ];
 
-function LogoComponent({ logoUrl, t }: { logoUrl: string; t: (ar: string, en: string) => string }) {
-  if (logoUrl) {
-    return (
-      <img
-        src={logoUrl}
-        alt="EMT Logo"
-        className="w-11 h-11 rounded-xl object-cover shadow-lg shadow-primary/20 transition-transform duration-300 group-hover:scale-105"
-      />
-    );
-  }
+const DEVELOPER_PORTFOLIO = 'https://prime-developer-portfolio-11.vercel.app';
+
+function LogoComponent({ logoUrl }: { logoUrl: string }) {
+  const src = logoUrl || '/logo.png';
   return (
-    <div className="w-11 h-11 rounded-xl gradient-primary flex items-center justify-center shadow-lg shadow-primary/20 transition-transform duration-300 group-hover:scale-105">
-      <span className="text-white font-extrabold text-xl tracking-tight">E</span>
-    </div>
+    <img
+      src={src}
+      alt="EMY Medical Tourism Logo"
+      className="h-11 w-auto rounded-xl object-contain shadow-lg shadow-primary/20 transition-transform duration-300 group-hover:scale-105"
+    />
   );
 }
 
@@ -72,6 +68,16 @@ export default function WebsiteHeader() {
           : 'bg-white/80 backdrop-blur-sm'
       }`}
     >
+      {/* شريط حقوق المطور */}
+      <a
+        href={DEVELOPER_PORTFOLIO}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block w-full bg-slate-900 text-center py-1.5 text-[11px] text-white/70 hover:text-white transition-colors"
+        title="Developer Portfolio"
+      >
+        Developed by <span className="font-semibold" dir="ltr">Adam Hawash</span> — Brand Developer
+      </a>
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
@@ -79,7 +85,7 @@ export default function WebsiteHeader() {
             onClick={() => scrollToSection('#home')}
             className="flex items-center gap-3 shrink-0 group"
           >
-            <LogoComponent logoUrl={siteLogo} t={t} />
+            <LogoComponent logoUrl={siteLogo} />
             <div className="flex flex-col">
               <span className="text-2xl font-extrabold text-primary leading-none tracking-tight">
                 EMT
@@ -147,7 +153,7 @@ export default function WebsiteHeader() {
                 <SheetTitle className="sr-only">القائمة</SheetTitle>
                 <div className="p-6 border-b border-border/50">
                   <div className="flex items-center gap-3">
-                    <LogoComponent logoUrl={siteLogo} t={t} />
+                    <LogoComponent logoUrl={siteLogo} />
                     <div>
                       <span className="text-xl font-extrabold text-primary">EMT</span>
                       <p className="text-xs text-muted-foreground">{t('سياحة علاجية', 'Medical Tourism')}</p>

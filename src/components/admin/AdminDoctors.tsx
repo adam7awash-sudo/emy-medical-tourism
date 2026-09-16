@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useLanguageStore } from '@/store/language-store'
+import { uploadFile } from '@/lib/upload-client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -76,13 +77,8 @@ export default function AdminDoctors() {
     if (!file) return
     setUploading(true)
     try {
-      const fd = new FormData()
-      fd.append('file', file)
-      const res = await fetch('/api/upload', { method: 'POST', body: fd })
-      if (res.ok) {
-        const data = await res.json()
-        setForm((f) => ({ ...f, image: data.url }))
-      }
+      const url = await uploadFile(file)
+      setForm((f) => ({ ...f, image: url }))
     } catch { toast({ title: t('فشل رفع الصورة', 'Upload failed'), variant: 'destructive' }) }
     finally { setUploading(false) }
   }
